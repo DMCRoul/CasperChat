@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasperChat", "CasperChat\CasperChat.csproj", "{3AC7A022-F232-42FB-9649-8E73ABECCC44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CasperChat.Client", "CasperChat\CasperChat.Client.csproj", "{3AC7A022-F232-42FB-9649-8E73ABECCC44}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasperChatServer", "CasperChatServer\CasperChatServer.csproj", "{81D92B78-840F-4904-B737-DC9115427F9F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CasperChat.Server", "CasperChatServer\CasperChat.Server.csproj", "{81D92B78-840F-4904-B737-DC9115427F9F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasperChat.Shared", "CasperChat.Shared\CasperChat.Shared.csproj", "{9288C145-1A0F-4601-925D-539DB3DEBD24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{81D92B78-840F-4904-B737-DC9115427F9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81D92B78-840F-4904-B737-DC9115427F9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81D92B78-840F-4904-B737-DC9115427F9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9288C145-1A0F-4601-925D-539DB3DEBD24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9288C145-1A0F-4601-925D-539DB3DEBD24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9288C145-1A0F-4601-925D-539DB3DEBD24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9288C145-1A0F-4601-925D-539DB3DEBD24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -13,4 +13,8 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CasperChat.Shared\CasperChat.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

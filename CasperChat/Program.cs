@@ -9,8 +9,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
-
-
+using CasperChat.Shared.Models;
+using CasperChat.Client.Services;
 internal static class Program
 {
     [STAThread]
@@ -23,10 +23,6 @@ internal static class Program
 
 public class ChatForm : Form
 {
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
-
-    private const uint WDA_EXCLUDEFROMCAPTURE = 0x00000011;
 
     private HubConnection? connection;
     private string username = "";
@@ -49,13 +45,7 @@ public class ChatForm : Form
         return "http://localhost:5064" + relativeOrAbsoluteUrl;
     }
 
-    private void ApplyCaptureProtectionToWindow(Form form)
-    {
-        if (form == null || form.IsDisposed)
-            return;
 
-        SetWindowDisplayAffinity(form.Handle, WDA_EXCLUDEFROMCAPTURE);
-    }
     private bool IsImageFile(string fileName)
     {
         string ext = Path.GetExtension(fileName).ToLowerInvariant();
@@ -352,7 +342,6 @@ public class ChatForm : Form
             UpdateTopBarUserLabel();
         };
     }
-
     private void UpdateTopBarUserLabel()
     {
         currentUserLabel.Text = string.IsNullOrWhiteSpace(username) ? "offline" : username;
@@ -361,12 +350,11 @@ public class ChatForm : Form
 
     private void ApplyCaptureProtection()
     {
-        bool ok = SetWindowDisplayAffinity(this.Handle, WDA_EXCLUDEFROMCAPTURE);
+        bool ok = CaptureProtectionService.Apply(this);
 
         if (!ok)
         {
-            int error = Marshal.GetLastWin32Error();
-            AddSystemCard($"Не удалось включить защиту. Win32 Error = {error}");
+            AddSystemCard("Не удалось включить защиту окна");
         }
     }
 
@@ -568,9 +556,6 @@ public class ChatForm : Form
         }
     }
 
-
-
-
     private void AddSystemCard(string text)
     {
         var wrapper = new Panel
@@ -596,7 +581,6 @@ public class ChatForm : Form
         messagesPanel.Controls.Add(wrapper);
         ScrollToBottom();
     }
-
     private void AddMessageCard(string sender, string text, string createdAtUtc, bool isMine)
     {
         var row = new Panel
@@ -763,7 +747,6 @@ public class ChatForm : Form
         ScrollToBottom();
     }
 
-
     private void AddImageCard(string sender, string fileName, string fileUrl, string createdAtUtc, bool isMine)
     {
         var row = new Panel
@@ -923,7 +906,7 @@ public class ChatForm : Form
         // Очень важно:
         // защита ставится после создания и показа окна,
         // когда у него уже есть валидный Handle.
-        viewer.Shown += (_, _) => ApplyCaptureProtectionToWindow(viewer);
+        viewer.Shown += (_, _) => CaptureProtectionService.Apply(viewer);
 
         viewer.ShowDialog(this);
     }
@@ -976,36 +959,6 @@ public class ChatForm : Form
     }
 }
 
-public class UploadResult
-{
-    public bool Success { get; set; }
-    public string FileName { get; set; } = "";
-    public string FileUrl { get; set; } = "";
-    public string Error { get; set; } = "";
-}
-
-public class ChatMessage
-{
-    public string FromUser { get; set; } = "";
-    public string ToUser { get; set; } = "";
-    public string Text { get; set; } = "";
-    public string MessageType { get; set; } = "text";
-    public string FileName { get; set; } = "";
-    public string FileUrl { get; set; } = "";
-    public string CreatedAtUtc { get; set; } = "";
-}
-
-
-public class AuthResult
-{
-    public bool Success { get; set; }
-    public string Message { get; set; } = "";
-}
-
-public class LoginSuccessData
-{
-    public string Username { get; set; } = "";
-}
 
 public static class LoginPrompt
 {
