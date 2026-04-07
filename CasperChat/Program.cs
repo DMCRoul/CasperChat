@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using CasperChat.Client.Forms;
 
 internal static class Program
 {
@@ -10,5 +11,3 @@ internal static class Program
         Application.Run(new ChatForm());
     }
 }
-
-
