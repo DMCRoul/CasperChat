@@ -1,5 +1,6 @@
 ﻿namespace CasperChat
 {
+
     partial class Form1
     {
         /// <summary>
