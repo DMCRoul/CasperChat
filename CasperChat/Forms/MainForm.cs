@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CasperChat.Client.Services;
 using CasperChat.Client.UI;
 using CasperChat.Shared.Models;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace CasperChat.Client.Forms
 {
@@ -17,6 +20,7 @@ namespace CasperChat.Client.Forms
         private ContextMenuStrip trayMenu;
         private string username = "";
         private string selectedUser = "";
+        private readonly Button screenshotButton = new Button();
 
         private readonly HttpClient httpClient = new HttpClient
         {
@@ -62,6 +66,84 @@ namespace CasperChat.Client.Forms
             WireEvents();
         }
 
+
+        private byte[] CaptureFullDesktopPng()
+        {
+            Rectangle bounds = SystemInformation.VirtualScreen;
+
+            using Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height);
+            using Graphics g = Graphics.FromImage(bitmap);
+
+            g.CopyFromScreen(bounds.Location, Point.Empty, bounds.Size);
+
+            using MemoryStream ms = new MemoryStream();
+            bitmap.Save(ms, ImageFormat.Png);
+
+            return ms.ToArray();
+        }
+
+        private async Task CaptureAndSendScreenshot()
+        {
+            if (!chatClientService.IsConnected)
+            {
+                AddSystemCard("Нет подключения к серверу");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(selectedUser))
+            {
+                AddSystemCard("Сначала выбери пользователя слева");
+                return;
+            }
+
+            try
+            {
+                Hide();
+                await Task.Delay(200);
+
+                Rectangle bounds = Screen.PrimaryScreen?.Bounds ?? new Rectangle(0, 0, 1920, 1080);
+
+                using var bitmap = new Bitmap(bounds.Width, bounds.Height);
+                using (var graphics = Graphics.FromImage(bitmap))
+                {
+                    graphics.CopyFromScreen(bounds.Location, Point.Empty, bounds.Size);
+                }
+
+                Show();
+                Activate();
+
+                using var stream = new MemoryStream();
+                bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                stream.Position = 0;
+
+                string fileName = $"screenshot_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+
+                var uploadResult = await fileUploadService.UploadStreamAsync(
+                    stream,
+                    fileName,
+                    "image/png"
+                );
+
+                if (uploadResult == null || !uploadResult.Success)
+                {
+                    AddSystemCard("Ошибка загрузки скриншота");
+                    return;
+                }
+
+                await chatClientService.SendFileMessageAsync(
+                    selectedUser,
+                    uploadResult.FileName,
+                    uploadResult.FileUrl
+                );
+            }
+            catch (Exception ex)
+            {
+                Show();
+                Activate();
+                AddSystemCard("Ошибка отправки скриншота: " + ex.Message);
+            }
+        }
+
         private void InitializeTray()
         {
             trayMenu = new ContextMenuStrip();
@@ -103,7 +185,7 @@ namespace CasperChat.Client.Forms
 
             base.OnFormClosing(e);
         }
-
+        
         private async Task PickAndSendDocument()
         {
             if (!chatClientService.IsConnected)
@@ -238,6 +320,27 @@ namespace CasperChat.Client.Forms
             attachButton.Font = new Font("Segoe UI", 14f, FontStyle.Regular);
             attachButton.Cursor = Cursors.Hand;
 
+            screenshotButton.Text = "📸";
+            screenshotButton.Width = 54;
+            screenshotButton.Dock = DockStyle.Left;
+            screenshotButton.FlatStyle = FlatStyle.Flat;
+            screenshotButton.FlatAppearance.BorderSize = 0;
+            screenshotButton.BackColor = Theme.SurfaceColor;
+            screenshotButton.ForeColor = Theme.TextPrimary;
+            screenshotButton.Font = new Font("Segoe UI Emoji", 12f, FontStyle.Regular);
+            screenshotButton.Cursor = Cursors.Hand;
+
+
+            screenshotButton.Text = "Скриншот";
+            screenshotButton.Width = 120;
+            screenshotButton.Dock = DockStyle.Right;
+            screenshotButton.FlatStyle = FlatStyle.Flat;
+            screenshotButton.FlatAppearance.BorderSize = 0;
+            screenshotButton.BackColor = Theme.SurfaceColor;
+            screenshotButton.ForeColor = Theme.TextPrimary;
+            screenshotButton.Font = new Font("Segoe UI", 9.5f, FontStyle.Regular);
+            screenshotButton.Cursor = Cursors.Hand;
+
             sendButton.Text = "Отправить";
             sendButton.Width = 130;
             sendButton.Dock = DockStyle.Right;
@@ -267,6 +370,7 @@ namespace CasperChat.Client.Forms
 
             bottomBar.Controls.Add(inputContainer);
             bottomBar.Controls.Add(sendButton);
+            bottomBar.Controls.Add(screenshotButton);
             bottomBar.Controls.Add(attachButton);
 
             mainPanel.Controls.Add(messagesPanel);
@@ -317,6 +421,7 @@ namespace CasperChat.Client.Forms
                 UpdateMessageWidths();
                 UpdateTopBarUserLabel();
             };
+            screenshotButton.Click += async (_, _) => await CaptureAndSendScreenshot();
         }
 
         private void UpdateTopBarUserLabel()
@@ -324,6 +429,7 @@ namespace CasperChat.Client.Forms
             currentUserLabel.Text = string.IsNullOrWhiteSpace(username) ? "offline" : username;
             currentUserLabel.Left = topBar.Width - currentUserLabel.Width - 18;
         }
+
 
         private void ApplyCaptureProtection()
         {
@@ -445,6 +551,8 @@ namespace CasperChat.Client.Forms
             UpdateTopBarUserLabel();
             AddSystemCard($"Вы вошли как {username}");
         }
+
+
 
         private async Task SendTextMessage()
         {

@@ -1,13 +1,16 @@
-﻿using System;
+﻿using CasperChat.Client.Forms;
+using System;
 using System.Windows.Forms;
-using CasperChat.Client.Forms;
 
-internal static class Program
+namespace CasperChat.Client
 {
-    [STAThread]
-    static void Main()
+    internal static partial class Program
     {
-        ApplicationConfiguration.Initialize();
-        Application.Run(new ChatForm());
+        [STAThread]
+        static void Main()
+        {
+            ApplicationConfiguration.Initialize();
+            Application.Run(new ChatForm());
+        }
     }
 }

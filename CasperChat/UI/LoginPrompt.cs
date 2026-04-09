@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.AspNetCore.SignalR.Client;
 using CasperChat.Shared.Models;
+using CasperChat.Client.Services;
 
 namespace CasperChat.Client.UI
 {
@@ -11,6 +12,7 @@ namespace CasperChat.Client.UI
     {
         public static async Task<LoginSuccessData?> ShowDialogAsync(HubConnection connection)
         {
+
             LoginSuccessData? result = null;
 
             Color bgColor = Color.FromArgb(28, 32, 38);
@@ -32,6 +34,11 @@ namespace CasperChat.Client.UI
                 ForeColor = textPrimary,
                 ClientSize = new Size(560, 420),
                 AutoScaleMode = AutoScaleMode.Dpi
+            };
+
+            prompt.Shown += (_, _) =>
+            {
+                CaptureProtectionService.Apply(prompt);
             };
 
             var root = new TableLayoutPanel
