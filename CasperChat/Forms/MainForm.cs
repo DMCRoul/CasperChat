@@ -25,6 +25,7 @@ namespace CasperChat.Client.Forms
         private readonly HttpClient httpClient = new HttpClient
         {
             BaseAddress = new Uri(ServerUrlService.GetBaseUrl())
+
         };
 
         private readonly FileUploadService fileUploadService;

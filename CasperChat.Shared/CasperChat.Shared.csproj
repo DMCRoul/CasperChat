@@ -45,6 +45,7 @@
     <Compile Include="Models\ChatMessage.cs" />
     <Compile Include="Models\LoginSuccessData.cs" />
     <Compile Include="Models\UploadResult.cs" />
+    <Compile Include="Models\VersionInfoResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
