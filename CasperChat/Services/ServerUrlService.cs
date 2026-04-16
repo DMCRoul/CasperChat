@@ -4,7 +4,7 @@ namespace CasperChat.Client.Services
 {
     public static class ServerUrlService
     {
-        private const string BaseUrl = "http://89.167.2.148:5064";
+        private const string BaseUrl = "http://127.0.0.1:5064";
         private const string ChatHubPath = "/chat";
 
         public static string GetBaseUrl()

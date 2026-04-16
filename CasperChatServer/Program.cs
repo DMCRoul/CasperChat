@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.SignalR;
+using CasperChat.Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +27,6 @@ app.MapPost("/upload", async (HttpRequest request) =>
         return Results.BadRequest("Invalid form");
 
     var form = await request.ReadFormAsync();
-
     var file = form.Files.FirstOrDefault();
 
     if (file == null || file.Length == 0)
@@ -55,5 +54,6 @@ app.MapPost("/upload", async (HttpRequest request) =>
     });
 });
 
-app.MapGet("/", () => "Casper Chat Server Running");
+app.MapHub<ChatHub>("/chat");
+
 app.Run();
